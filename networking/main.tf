@@ -72,23 +72,16 @@ resource "aws_route_table_association" "public_rt_assoc" {
 }
 
 resource "aws_eip" "nat_eip" {
-  for_each = aws_subnet.public_subnets
   domain = "vpc"
-  
-  tags = {
-    Name = "nat_eip_${each.key}"
-  }
 }
 
 resource "aws_nat_gateway" "nat_gw" {
-  for_each      = aws_subnet.public_subnets
-  allocation_id = aws_eip.nat_eip[each.key].id
-  subnet_id     = each.value.id
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.public_subnets[element(keys(aws_subnet.public_subnets), 0)].id
   tags = {
-    Name = "nat_gw_${each.key}"
+    Name = "nat_gw"
   }
 }
-
 
 resource "aws_route_table" "app_rt" {
   vpc_id = aws_vpc.vpc.id
@@ -98,11 +91,9 @@ resource "aws_route_table" "app_rt" {
 }
 
 resource "aws_route" "natgw_route" {
-  for_each = aws_nat_gateway.nat_gw
   route_table_id         = aws_route_table.app_rt.id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = each.value.id
-
+  nat_gateway_id         = aws_nat_gateway.nat_gw.id
   lifecycle {
     create_before_destroy = true
   }
