@@ -40,3 +40,22 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+        
+      - name: Get RDS Endpoint
+        id: rds_endpoint
+        run: echo "::set-output name=db_endpoint::$(terraform output -raw rds_endpoint)"
+
+      - name: Wait for RDS to be available
+        run: |
+          until nc -zv ${{ steps.rds_endpoint.outputs.db_endpoint }} 5432; do
+            echo "Waiting for RDS database to be ready..."
+            sleep 10
+          done
+
+      - name: Load SQL dump into PostgreSQL
+        run: |
+          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${{ steps.rds_endpoint.outputs.db_endpoint }} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f ./data/data.sql
+
+
+
+          
