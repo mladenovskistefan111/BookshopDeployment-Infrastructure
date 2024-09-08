@@ -37,12 +37,12 @@ private_dbsubnets = {
   }
 }
 
-# db_instance_count = 1
-# db_storage        = 10
-# engine            = "postgresql"
-# db_engine_version = "16.3-R2"
-# db_instance_class = "db.t3.micro"
-# db_identifier     = "db"
+db_instance_count = 1
+db_storage        = 10
+engine            = "postgres"
+db_engine_version = "16.3"
+db_instance_class = "db.t3.micro"
+db_identifier     = "db"
 
 
 # # LB

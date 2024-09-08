@@ -10,20 +10,20 @@ module "networking" {
   db_subnet_group    = true
 }
 
-# module "database" {
-#   source                = "./database"
-#   vpc_id                = module.networking.vpc_id
-#   # app_security_group_id = module.compute.app_security_group_id
-#   db_instance_count     = var.db_instance_count
-#   db_storage            = var.db_storage
-#   engine                = var.engine
-#   db_engine_version     = var.db_engine_version
-#   db_instance_class     = var.db_instance_class
-#   db_subnet_group_name  = module.networking.db_subnet_group_names[0]
-#   db_identifier         = var.db_identifier
-#   multi_az              = false
-#   skip_db_snapshot      = true
-# }
+module "database" {
+  source = "./database"
+  vpc_id = module.networking.vpc_id
+  # app_security_group_id = module.compute.app_security_group_id
+  db_instance_count    = var.db_instance_count
+  db_storage           = var.db_storage
+  engine               = var.engine
+  db_engine_version    = var.db_engine_version
+  db_instance_class    = var.db_instance_class
+  db_subnet_group_name = module.networking.db_subnet_group_names[0]
+  db_identifier        = var.db_identifier
+  multi_az             = false
+  skip_db_snapshot     = true
+}
 
 # module "loadbalancing" {
 #   source                 = "./loadbalancing"
