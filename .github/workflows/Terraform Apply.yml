@@ -43,7 +43,6 @@ jobs:
 
       - name: Set DB Endpoint
         id: set_endpoint
-        working-directory: ./database
         run: echo "DB_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
 
       - name: Load SQL dump into PostgreSQL
