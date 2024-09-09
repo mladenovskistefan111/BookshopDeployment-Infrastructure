@@ -78,10 +78,15 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -i /tmp/bastion_key ./data/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
 
+
       - name: Load SQL dump into PostgreSQL via Bastion Host
         run: |
-          ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} \
-          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/data.sql'
+          ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} << EOF
+          export PGPASSWORD="${{ secrets.DB_PASSWORD }}"
+          psql -h ${DB_ENDPOINT} -U "${{ secrets.DB_USER }}" -d "${{ secrets.DB_NAME }}" -f /home/ubuntu/data.sql
+          EOF
+        env:
+          DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
 
       - name: Remove temporary SSH key
         run: |
