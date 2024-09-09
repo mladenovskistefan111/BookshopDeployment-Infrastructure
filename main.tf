@@ -13,7 +13,8 @@ module "networking" {
 module "bastion" {
   source          = "./bastion"
   vpc_id          = module.networking.vpc_id
-  public_key_path = var.public_key_path
+  # public_key_path = var.public_key_path
+  ssh_public_key = var.ssh_public_key
   instance_type   = var.instance_type
   public_subnet   = keys(module.networking.public_subnets)[0]
 }
