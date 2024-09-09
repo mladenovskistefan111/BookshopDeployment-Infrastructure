@@ -52,14 +52,25 @@ jobs:
         id: set_bastion_ip
         run: echo "BASTION_HOST_IP=$(terraform output -raw bastion_host_ip)" >> $GITHUB_ENV
 
+      - name: Save SSH key to a temporary file
+        run: |
+         echo "${{ secrets.BASTION_PRIVATE_KEY }}" > /tmp/bastion_key
+         chmod 600 /tmp/bastion_key
+
       - name: Copy SQL dump to Bastion Host
         run: |
-          scp -o StrictHostKeyChecking=no -i <(echo "${{ secrets.BASTION_PRIVATE_KEY }}") database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
-    
+          scp -o StrictHostKeyChecking=no -i /tmp/bastion_key database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/database/
+        env:
+          BASTION_HOST_IP: ${{ env.BASTION_HOST_IP }}
+
       - name: Load SQL dump into PostgreSQL via Bastion Host
         run: |
-          ssh -o StrictHostKeyChecking=no -i <(echo "${{ secrets.BASTION_PRIVATE_KEY }}") ubuntu@${{ env.BASTION_HOST_IP }} \
-          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/data.sql'
-
+          ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} \
+          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/database/data.sql'
         env:
           DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
+          BASTION_HOST_IP: ${{ env.BASTION_HOST_IP }}
+
+      - name: Remove temporary SSH key
+        run: |
+         rm /tmp/bastion_key
