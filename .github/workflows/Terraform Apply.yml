@@ -52,10 +52,12 @@ jobs:
         id: set_bastion_ip
         run: echo "BASTION_HOST_IP=$(terraform output -raw bastion_host_ip)" >> $GITHUB_ENV
 
-      - name: Save SSH key to a temporary file
+      - name: Save SSH private and public key to a temporary file
         run: |
          echo "${{ secrets.BASTION_PRIVATE_KEY }}" > /tmp/bastion_key
+         echo "${{ secrets.SSH_PUBLIC_KEY }}" > /tmp/bastion_public_key
          chmod 600 /tmp/bastion_key
+         chmod 600 /tmp/bastion_public_key
 
       - name: Wait for Bastion to be ready
         run: |
@@ -88,3 +90,4 @@ jobs:
       - name: Remove temporary SSH key
         run: |
          rm /tmp/bastion_key
+         rm /tmp/bastion_public_key
