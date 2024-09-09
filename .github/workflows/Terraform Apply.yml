@@ -66,7 +66,7 @@ jobs:
       - name: Wait for Bastion Host
         run: |
           for i in {1..10}; do
-            if ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} exit; then
+            if ssh -o StrictHostKeyChecking=no -i secrets.BASTION_PRIVATE_KEY ubuntu@${{ env.BASTION_HOST_IP }} exit; then
               echo "Bastion host is ready!"
               break
             else
@@ -77,11 +77,11 @@ jobs:
 
       - name: Copy SQL dump to Bastion Host
         run: |
-          scp -o StrictHostKeyChecking=no -i /tmp/bastion_key database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i secrets.BASTION_PRIVATE_KEY database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
 
       - name: Load SQL dump into PostgreSQL via Bastion Host
         run: |
-          ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} \
+          ssh -o StrictHostKeyChecking=no -i secrets.BASTION_PRIVATE_KEY ubuntu@${{ env.BASTION_HOST_IP }} \
           'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/data.sql'
 
       - name: Remove temporary SSH key
