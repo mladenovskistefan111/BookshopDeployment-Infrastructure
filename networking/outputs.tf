@@ -10,6 +10,10 @@ output "public_subnets" {
   }
 }
 
+output "bastion_public_subnet_id" {
+  value = aws_subnet.public_subnets[element(keys(aws_subnet.public_subnets), 0)].id
+}
+
 output "private_appsubnets" {
   value = {
     for key, subnet in aws_subnet.private_appsubnets : key => subnet.id

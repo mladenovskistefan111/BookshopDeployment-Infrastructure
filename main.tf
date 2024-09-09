@@ -16,7 +16,7 @@ module "bastion" {
   # public_key_path = var.public_key_path
   ssh_public_key = var.ssh_public_key
   instance_type   = var.instance_type
-  public_subnet   = keys(module.networking.public_subnets)[0]
+  public_subnet   = module.networking.bastion_public_subnet_id
 }
 
 module "database" {
