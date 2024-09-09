@@ -48,6 +48,13 @@ jobs:
           DB_ENDPOINT=$(echo $FULL_ENDPOINT | awk -F: '{print $1}')
           echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
 
-      - name: Load SQL dump into PostgreSQL
+      - name: Set Bastion Host IP
+        id: set_bastion_ip
+        run: echo "BASTION_HOST_IP=$(terraform output -raw bastion_host_ip)" >> $GITHUB_ENV
+
+      - name: Load SQL dump into PostgreSQL via Bastion Host
         run: |
-          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${{ env.DB_ENDPOINT }} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f ./data/data.sql
+          ssh -o StrictHostKeyChecking=no -i <(echo "${{ secrets.BASTION_PRIVATE_KEY }}") ubuntu@${{ env.BASTION_HOST_IP }} \
+          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /path/to/data.sql'
+        env:
+          DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
