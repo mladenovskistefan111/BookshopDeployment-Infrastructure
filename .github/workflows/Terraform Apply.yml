@@ -57,6 +57,20 @@ jobs:
          echo "${{ secrets.BASTION_PRIVATE_KEY }}" > /tmp/bastion_key
          chmod 600 /tmp/bastion_key
 
+      - name: Wait for Bastion to be ready
+        run: |
+          for i in {1..10}; do
+            if ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} exit; then
+              echo "Bastion host is ready!"
+              break
+            else
+              echo "Waiting for Bastion host to initialize..."
+              sleep 15
+            fi
+          done
+        env:
+          BASTION_HOST_IP: ${{ env.BASTION_HOST_IP }}
+
       - name: Copy SQL dump to Bastion Host
         run: |
           scp -o StrictHostKeyChecking=no -i /tmp/bastion_key database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/database/
