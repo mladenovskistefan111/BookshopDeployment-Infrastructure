@@ -69,6 +69,11 @@ jobs:
             fi
           done
 
+      - name: Install PostgreSQL client on Bastion Host
+        run: |
+          ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} \
+          'sudo apt-get update && sudo apt-get install -y postgresql-client'
+
       - name: Copy SQL dump to Bastion Host
         run: |
           scp -o StrictHostKeyChecking=no -i /tmp/bastion_key ./data/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
