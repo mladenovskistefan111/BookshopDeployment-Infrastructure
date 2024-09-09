@@ -52,14 +52,19 @@ jobs:
         id: set_bastion_ip
         run: echo "BASTION_HOST_IP=$(terraform output -raw bastion_host_ip)" >> $GITHUB_ENV
 
-      - name: Save SSH private and public key to a temporary file
+      - name: Save SSH key to a temporary file
         run: |
-         echo "${{ secrets.BASTION_PRIVATE_KEY }}" > /tmp/bastion_key
-         echo "${{ secrets.SSH_PUBLIC_KEY }}" > /tmp/bastion_public_key
-         chmod 600 /tmp/bastion_key
-         chmod 600 /tmp/bastion_public_key
+          echo "${{ secrets.BASTION_PRIVATE_KEY }}" > /tmp/bastion_key
+          chmod 600 /tmp/bastion_key
 
-      - name: Wait for Bastion to be ready
+      - name: Debug SSH Keys
+        run: |
+          echo "Private Key Contents:"
+          cat /tmp/bastion_key
+          echo "Public Key Contents:"
+          echo "${{ secrets.SSH_PUBLIC_KEY }}"
+
+      - name: Wait for Bastion Host
         run: |
           for i in {1..10}; do
             if ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} exit; then
@@ -70,24 +75,16 @@ jobs:
               sleep 15
             fi
           done
-        env:
-          BASTION_HOST_IP: ${{ env.BASTION_HOST_IP }}
 
       - name: Copy SQL dump to Bastion Host
         run: |
-          scp -o StrictHostKeyChecking=no -i /tmp/bastion_key database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
-        env:
-          BASTION_HOST_IP: ${{ env.BASTION_HOST_IP }}
+          scp -o StrictHostKeyChecking=no -i /tmp/bastion_key database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/database/
 
       - name: Load SQL dump into PostgreSQL via Bastion Host
         run: |
           ssh -o StrictHostKeyChecking=no -i /tmp/bastion_key ubuntu@${{ env.BASTION_HOST_IP }} \
-          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/data.sql'
-        env:
-          DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
-          BASTION_HOST_IP: ${{ env.BASTION_HOST_IP }}
+          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/database/data.sql'
 
       - name: Remove temporary SSH key
         run: |
-         rm /tmp/bastion_key
-         rm /tmp/bastion_public_key
+          rm /tmp/bastion_key
