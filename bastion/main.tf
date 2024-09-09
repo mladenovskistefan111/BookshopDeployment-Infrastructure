@@ -30,11 +30,15 @@ resource "aws_security_group" "bastion_security_group" {
   }
 }
 
+# resource "aws_key_pair" "bastion_key" {
+#   key_name   = "bastion-key"
+#   public_key = var.public_key_path
+# }
+
 resource "aws_key_pair" "bastion_key" {
   key_name   = "bastion-key"
-  public_key = var.public_key_path
+  public_key = var.ssh_public_key
 }
-
 
 resource "aws_instance" "bastion" {
   ami             = data.aws_ami.server_ami.id
