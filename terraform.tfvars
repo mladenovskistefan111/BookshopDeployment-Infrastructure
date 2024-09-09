@@ -37,6 +37,9 @@ private_dbsubnets = {
   }
 }
 
+instance_type   = "t2.micro"
+public_key_path = "C:/Users/Stefan Mladenov/.ssh/id_rsa.pub"
+
 db_instance_count = 1
 db_storage        = 10
 engine            = "postgres"

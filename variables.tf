@@ -6,6 +6,9 @@ variable "public_subnets" {}
 variable "private_appsubnets" {}
 variable "private_dbsubnets" {}
 
+variable "public_key_path" {}
+variable "instance_type" {}
+
 variable "db_instance_count" {}
 variable "db_storage" {}
 variable "engine" {}

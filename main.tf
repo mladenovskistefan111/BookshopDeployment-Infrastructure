@@ -10,9 +10,18 @@ module "networking" {
   db_subnet_group    = true
 }
 
+module "bastion" {
+  source          = "./bastion"
+  vpc_id          = module.networking.vpc_id
+  public_key_path = var.public_key_path
+  instance_type   = var.instance_type
+  public_subnet   = keys(module.networking.public_subnets)[0]
+}
+
 module "database" {
   source = "./database"
   vpc_id = module.networking.vpc_id
+  bastion_security_group_id = module.bastion.bastion_security_group_id
   # app_security_group_id = module.compute.app_security_group_id
   db_instance_count    = var.db_instance_count
   db_storage           = var.db_storage

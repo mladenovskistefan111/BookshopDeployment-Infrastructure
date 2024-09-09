@@ -14,6 +14,16 @@ resource "aws_security_group" "db_security_group" {
   vpc_id      = var.vpc_id
 }
 
+resource "aws_security_group_rule" "allow_bastion_to_rds" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.db_security_group.id
+  source_security_group_id = var.bastion_security_group_id
+}
+
+
 # resource "aws_security_group_rule" "rds_ingress_from_app" {
 #   type                     = "ingress"
 #   from_port                = 3306

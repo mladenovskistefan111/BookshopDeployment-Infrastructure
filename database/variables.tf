@@ -1,6 +1,7 @@
 # --- database/variables.tf ---
 
 variable "vpc_id" {}
+variable "bastion_security_group_id" {}
 variable "db_instance_count" {}
 variable "db_storage" {}
 variable "engine" {}
