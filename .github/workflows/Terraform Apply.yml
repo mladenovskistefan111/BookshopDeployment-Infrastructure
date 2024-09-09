@@ -54,12 +54,12 @@ jobs:
 
       - name: Copy SQL dump to Bastion Host
         run: |
-          scp -o StrictHostKeyChecking=no -i <(echo "${{ secrets.BASTION_PRIVATE_KEY }}") database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/database/
+          scp -o StrictHostKeyChecking=no -i <(echo "${{ secrets.BASTION_PRIVATE_KEY }}") database/data.sql ubuntu@${{ env.BASTION_HOST_IP }}:/home/ubuntu/
     
       - name: Load SQL dump into PostgreSQL via Bastion Host
         run: |
           ssh -o StrictHostKeyChecking=no -i <(echo "${{ secrets.BASTION_PRIVATE_KEY }}") ubuntu@${{ env.BASTION_HOST_IP }} \
-          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/database/data.sql'
+          'PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h ${DB_ENDPOINT} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f /home/ubuntu/data.sql'
 
         env:
           DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
