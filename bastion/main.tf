@@ -47,6 +47,11 @@ resource "aws_instance" "bastion" {
   security_groups = [aws_security_group.bastion_security_group.id]
   subnet_id       = var.public_subnet
 
+  root_block_device {
+    volume_size = 50
+    volume_type = "gp2"
+  }
+
   tags = {
     Name = "BastionHost"
   }
