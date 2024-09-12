@@ -1,0 +1,15 @@
+image:
+  repository: mladenovskistefan/frontend
+  tag: latest
+
+service:
+  name: frontend-service
+  type: LoadBalancer
+  port: 80
+  targetPort: 3000
+
+namespace: devops-project
+
+backendService:
+  name: backend-service
+  port: 8080

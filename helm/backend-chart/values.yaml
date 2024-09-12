@@ -1,0 +1,11 @@
+namespace: devops-project
+
+image:
+  repository: mladenovskistefan/backend
+  tag: latest
+
+db:
+  endpoint: "{{ .Values.db.endpoint }}"
+  username: "{{ .Values.db.username }}"
+  password: "{{ .Values.db.password }}"
+  name: "{{ .Values.db.name }}"
