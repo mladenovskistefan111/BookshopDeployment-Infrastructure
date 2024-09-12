@@ -6,7 +6,6 @@ variable "public_subnets" {}
 variable "private_appsubnets" {}
 variable "private_dbsubnets" {}
 
-# variable "public_key_path" {}
 variable "ssh_public_key" {
   description = "SSH public key for Bastion host"
   type        = string
@@ -20,10 +19,8 @@ variable "db_engine_version" {}
 variable "db_instance_class" {}
 variable "db_identifier" {}
 
-#LB
 
-
-# variable "cluster_name" {}
+variable "cluster_name" {}
 
 
 

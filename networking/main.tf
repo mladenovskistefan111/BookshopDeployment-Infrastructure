@@ -1,5 +1,7 @@
 # --- networking/main.tf ---
 
+# Create VPC
+
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -11,6 +13,8 @@ resource "aws_vpc" "vpc" {
     create_before_destroy = true
   }
 }
+
+# Create subnets in the VPC - public_subnets, private_appsubnets, private_dbsubnets
 
 resource "aws_subnet" "public_subnets" {
   for_each                = var.public_subnets
@@ -45,6 +49,8 @@ resource "aws_subnet" "private_dbsubnets" {
   }
 }
 
+# Create InternetGW, Public Route Table that routes to the InternetGW, associate public_subnets with the Route Table
+
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.vpc.id
   tags = {
@@ -54,15 +60,13 @@ resource "aws_internet_gateway" "internet_gateway" {
 
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.internet_gateway.id
+  }
   tags = {
     Name = "public_rt"
   }
-}
-
-resource "aws_route" "igw_route" {
-  route_table_id         = aws_route_table.public_rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.internet_gateway.id
 }
 
 resource "aws_route_table_association" "public_rt_assoc" {
@@ -71,29 +75,43 @@ resource "aws_route_table_association" "public_rt_assoc" {
   route_table_id = aws_route_table.public_rt.id
 }
 
+# Create NAT EIPs and NATGW for each public_subnet
+
 resource "aws_eip" "nat_eip" {
+  for_each = aws_subnet.public_subnets
   domain = "vpc"
+  tags = {
+    Name = "nat_eip_${each.key}"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_nat_gateway" "nat_gw" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public_subnets[element(keys(aws_subnet.public_subnets), 0)].id
+  for_each      = aws_subnet.public_subnets
+  allocation_id = aws_eip.nat_eip[each.key].id
+  subnet_id     = each.value.id
   tags = {
-    Name = "nat_gw"
+    Name = "nat_gw_${each.key}"
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
+
+# Create Private Route Tables that route to NATGWs, associate private_appsubnets with the Route Table
 
 resource "aws_route_table" "app_rt" {
-  vpc_id = aws_vpc.vpc.id
-  tags = {
-    Name = "app_rt"
+  for_each = aws_nat_gateway.nat_gw
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = each.value.id
   }
-}
-
-resource "aws_route" "natgw_route" {
-  route_table_id         = aws_route_table.app_rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat_gw.id
+  vpc_id   = aws_vpc.vpc.id
+  tags = {
+    Name = "app_rt_${each.key}"
+  }
   lifecycle {
     create_before_destroy = true
   }
@@ -102,8 +120,10 @@ resource "aws_route" "natgw_route" {
 resource "aws_route_table_association" "app_rt_assoc" {
   for_each       = aws_subnet.private_appsubnets
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.app_rt.id
+  route_table_id = aws_route_table.app_rt[each.key].id
 }
+
+# Create Private Route Table, associate private_dbsubnets with the Route Table
 
 resource "aws_route_table" "db_rt" {
   vpc_id = aws_vpc.vpc.id
@@ -117,6 +137,8 @@ resource "aws_route_table_association" "db_rt_assoc" {
   subnet_id      = each.value.id
   route_table_id = aws_route_table.db_rt.id
 }
+
+# Create a DB subnet group
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
   count      = var.db_subnet_group == true ? 1 : 0

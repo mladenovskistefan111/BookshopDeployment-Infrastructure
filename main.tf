@@ -13,7 +13,6 @@ module "networking" {
 module "bastion" {
   source          = "./bastion"
   vpc_id          = module.networking.vpc_id
-  # public_key_path = var.public_key_path
   ssh_public_key = var.ssh_public_key
   instance_type   = var.instance_type
   public_subnet   = module.networking.bastion_public_subnet_id
@@ -23,7 +22,7 @@ module "database" {
   source = "./database"
   vpc_id = module.networking.vpc_id
   bastion_security_group_id = module.bastion.bastion_security_group_id
-  # app_security_group_id = module.compute.app_security_group_id
+  app_security_group_id = module.application.app_security_group_id
   db_instance_count    = var.db_instance_count
   db_storage           = var.db_storage
   engine               = var.engine
@@ -36,27 +35,12 @@ module "database" {
 }
 
 
-
-# module "loadbalancing" {
-#   source                 = "./loadbalancing"
-#   vpc_id                 = module.networking.vpc_id
-#   app_security_group_id  = module.compute.app_security_group_id
-#   public_subnets         = module.networking.public_subnets
-#   tg_port                = var.tg_port
-#   tg_protocol            = var.tg_protocol
-#   lb_healthy_threshold   = var.lb_healthy_threshold
-#   lb_unhealthy_threshold = var.lb_unhealthy_threshold
-#   lb_timeout             = var.lb_timeout
-#   lb_interval            = var.lb_interval
-#   listener_port          = var.listener_port
-#   listener_protocol      = var.listener_protocol
-# }
-
-# module "application" {
-#     source = "./application"
-#     cluster_name = var.cluster_name
-#     private_appsubnets = module.networking.private_appsubnets
-# }
+module "application" {
+    source = "./application"
+    vpc_id = module.networking.vpc_id
+    cluster_name = var.cluster_name
+    private_appsubnets = module.networking.private_appsubnets
+}
 
 
 

@@ -38,7 +38,6 @@ private_dbsubnets = {
 }
 
 instance_type   = "t2.micro"
-# public_key_path = "C:/Users/Stefan Mladenov/.ssh/id_rsa.pub"
 
 db_instance_count = 1
 db_storage        = 10
@@ -47,11 +46,7 @@ db_engine_version = "16.3"
 db_instance_class = "db.t3.micro"
 db_identifier     = "db"
 
-
-# # LB
-
-
-# cluster_name = "bookshop_cluster"
+cluster_name = "bookshop_cluster"
 
 
 
