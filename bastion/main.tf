@@ -48,11 +48,15 @@ resource "aws_instance" "bastion" {
   subnet_id       = var.public_subnet
 
   root_block_device {
-    volume_size = 50
+    volume_size = 20
     volume_type = "gp2"
   }
 
   tags = {
     Name = "BastionHost"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
