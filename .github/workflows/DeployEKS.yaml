@@ -1,0 +1,40 @@
+name: Deploy to EKS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: aws-actions/configure-kubectl@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          cluster-name: bookshop_cluster
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Deploy backend to EKS
+        run: |
+          helm upgrade --install backend ./helm/backend-chart \
+            --namespace devops-project \
+            --set db.endpoint=${{ secrets.DB_ENDPOINT }} \
+            --set db.username=${{ secrets.DB_USER }} \
+            --set db.password=${{ secrets.DB_PASSWORD }} \
+            --set db.name=${{ secrets.DB_NAME }}
+
+      - name: Deploy frontend to EKS
+        run: |
+          helm upgrade --install frontend ./helm/frontend-chart \
+            --namespace devops-project \
+            --set backendServiceName=backend-service \
+            --set backendServicePort=8080
