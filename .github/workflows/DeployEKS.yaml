@@ -23,6 +23,19 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region us-east-1
 
+      - name: Download DB Endpoint from S3
+        run: |
+          aws s3 cp s3://stefanremotestatefile/db-endpoint.txt db-endpoint.txt
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+
+      - name: Set DB Endpoint Environment Variable
+        run: |
+          DB_ENDPOINT=$(cat db-endpoint.txt)
+          echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
+
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --name bookshop_cluster --region us-east-1
@@ -39,7 +52,7 @@ jobs:
         run: |
           helm upgrade --install backend ./helm/backend-chart \
             --namespace devops-project \
-            --set db.endpoint=${{ secrets.DB_ENDPOINT }} \
+            --set db.endpoint=${{ env.DB_ENDPOINT }} \
             --set db.username=${{ secrets.DB_USER }} \
             --set db.password=${{ secrets.DB_PASSWORD }} \
             --set db.name=${{ secrets.DB_NAME }}
@@ -50,3 +63,22 @@ jobs:
             --namespace devops-project \
             --set backendServiceName=backend-service \
             --set backendServicePort=8080
+
+      - name: Get Frontend Service URL
+        id: get_service_url
+        run: |
+          SERVICE_NAME=frontend-service
+          NAMESPACE=devops-project
+          EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+          if [ -z "$EXTERNAL_IP" ]; then
+            EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+          fi
+          if [ -n "$EXTERNAL_IP" ]; then
+            echo "FRONTEND_URL=http://$EXTERNAL_IP" >> $GITHUB_ENV
+          else
+            echo "Frontend service is not yet available. Check back later."
+            exit 1
+        shell: bash
+
+      - name: Print Frontend URL
+        run: echo "Access your frontend application at:" ${{ env.FRONTEND_URL }}
