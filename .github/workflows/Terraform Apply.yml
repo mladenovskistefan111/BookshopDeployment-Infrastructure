@@ -91,7 +91,7 @@ jobs:
         run: echo "${{ env.DB_ENDPOINT }}" > db-endpoint.txt
 
       - name: Upload DB Endpoint as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: db-endpoint
           path: db-endpoint.txt
