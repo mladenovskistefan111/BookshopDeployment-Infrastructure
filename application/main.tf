@@ -120,12 +120,18 @@ resource "aws_eks_node_group" "node_group" {
 
 resource "aws_security_group" "eks_cluster_security_group" {
   name        = "eks_cluster_security_group"
-  description = "Allow internet access on port 80"
+  description = "Allow internet access on port 80 and 8080"
   vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

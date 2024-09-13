@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: {{ .Values.namespace | default "default" }}
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
       - name: frontend
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
-        - containerPort: {{ .Values.service.targetPort }}
+        - containerPort: 3000
         env:
         - name: REACT_APP_BACKEND_URL
-          value: "http://{{ .Values.backendService.name }}:{{ .Values.backendService.port }}/api"
+          value: "http://backend-serice:8080/api"
