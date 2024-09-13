@@ -87,9 +87,11 @@ jobs:
         run: |
           rm /tmp/bastion_key
           
+      - name: Save DB Endpoint to file
+        run: echo "${{ env.DB_ENDPOINT }}" > db-endpoint.txt
+
       - name: Upload DB Endpoint as artifact
         uses: actions/upload-artifact@v3
         with:
           name: db-endpoint
-          path: |
-            <(echo $DB_ENDPOINT)
+          path: db-endpoint.txt
