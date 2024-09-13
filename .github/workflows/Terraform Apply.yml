@@ -86,3 +86,10 @@ jobs:
       - name: Remove temporary SSH key
         run: |
           rm /tmp/bastion_key
+          
+      - name: Upload DB Endpoint as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: db-endpoint
+          path: |
+            <(echo $DB_ENDPOINT)
