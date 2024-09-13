@@ -39,7 +39,7 @@ jobs:
       - name: Set DB Endpoint Environment Variable
         id: set_db_endpoint
         run: |
-          DB_ENDPOINT=$(cat db-endpoint)
+          DB_ENDPOINT=$(cat db-endpoint/db-endpoint.txt)
           echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
 
       - name: Create Kubernetes namespace
