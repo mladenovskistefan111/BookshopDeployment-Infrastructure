@@ -70,16 +70,23 @@ jobs:
         run: |
           SERVICE_NAME=frontend-service
           NAMESPACE=devops-project
-          EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+          for i in {1..10}; do
+            EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+            if [ -z "$EXTERNAL_IP" ]; then
+              EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+            fi
+            if [ -n "$EXTERNAL_IP" ]; then
+              echo "FRONTEND_URL=http://$EXTERNAL_IP" >> $GITHUB_ENV
+              break
+            fi
+            echo "Waiting for frontend service to be available... attempt $i/10"
+            sleep 30
+          done
           if [ -z "$EXTERNAL_IP" ]; then
-            EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
-          fi
-          if [ -n "$EXTERNAL_IP" ]; then
-            echo "FRONTEND_URL=http://$EXTERNAL_IP" >> $GITHUB_ENV
-          else
             echo "Frontend service is not yet available. Check back later."
             exit 1
+          fi
         shell: bash
-        
+
       - name: Print Frontend URL
-        run: echo "Access your frontend application at:" ${{ env.FRONTEND_URL }}
+        run: echo "Access your frontend application at: ${{ env.FRONTEND_URL }}"
