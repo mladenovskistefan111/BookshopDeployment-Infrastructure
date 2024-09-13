@@ -2,7 +2,6 @@ namespace: devops-project
 
 image:
   repository: mladenovskistefan/backend
-  tag: latest
 
 db:
   endpoint: "{{ .Values.db.endpoint }}"
