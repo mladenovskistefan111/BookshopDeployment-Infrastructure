@@ -1,0 +1,92 @@
+name: Deploy to EKS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python and AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install awscli
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region us-east-1
+
+      - name: Download DB Endpoint from S3
+        run: |
+          aws s3 cp s3://stefanremotestatefile/db-endpoint.txt db-endpoint.txt
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+
+      - name: Set DB Endpoint Environment Variable
+        id: set_db_endpoint
+        run: |
+          DB_ENDPOINT=$(cat db-endpoint.txt)
+          echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --name bookshop_cluster --region us-east-1
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Create Kubernetes namespace
+        run: |
+          kubectl create namespace devops-project || echo "Namespace 'devops-project' already exists"
+
+      - name: Deploy backend to EKS
+        run: |
+          helm upgrade --install backend ./helm/backend-chart \
+            --namespace devops-project \
+            --set db.endpoint=${{ env.DB_ENDPOINT }} \
+            --set db.username=${{ secrets.DB_USER }} \
+            --set db.password=${{ secrets.DB_PASSWORD }} \
+            --set db.name=${{ secrets.DB_NAME }}
+
+      - name: Deploy frontend to EKS
+        run: |
+          helm upgrade --install frontend ./helm/frontend-chart \
+            --namespace devops-project \
+            --set backendServiceName=backend-service \
+            --set backendServicePort=8080
+
+      - name: Get Frontend Service URL
+        id: get_service_url
+        run: |
+          SERVICE_NAME=frontend-service
+          NAMESPACE=devops-project
+          for i in {1..10}; do
+            EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+            if [ -z "$EXTERNAL_IP" ]; then
+              EXTERNAL_IP=$(kubectl get service $SERVICE_NAME --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+            fi
+            if [ -n "$EXTERNAL_IP" ]; then
+              echo "FRONTEND_URL=http://$EXTERNAL_IP" >> $GITHUB_ENV
+              break
+            fi
+            echo "Waiting for frontend service to be available... attempt $i/10"
+            sleep 30
+          done
+          if [ -z "$EXTERNAL_IP" ]; then
+            echo "Frontend service is not yet available. Check back later."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Print Frontend URL
+        run: echo "Access your frontend application at: ${{ env.FRONTEND_URL }}"
