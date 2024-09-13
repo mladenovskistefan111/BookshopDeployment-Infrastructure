@@ -81,4 +81,4 @@ jobs:
         shell: bash
 
       - name: Print Frontend URL
-        run: echo "Access your frontend application at: ${{ env.FRONTEND_URL }}"
+        run: echo "Access your frontend application at:" ${{ env.FRONTEND_URL }}
