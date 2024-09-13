@@ -31,6 +31,17 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
+      - name: Download DB Endpoint artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: db-endpoint
+
+      - name: Set DB Endpoint Environment Variable
+        id: set_db_endpoint
+        run: |
+          DB_ENDPOINT=$(cat db-endpoint)
+          echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
+
       - name: Create Kubernetes namespace
         run: |
           kubectl create namespace devops-project || echo "Namespace 'devops-project' already exists"
@@ -39,7 +50,7 @@ jobs:
         run: |
           helm upgrade --install backend ./helm/backend-chart \
             --namespace devops-project \
-            --set db.endpoint=${{ secrets.DB_ENDPOINT }} \
+            --set db.endpoint=${{ env.DB_ENDPOINT }} \
             --set db.username=${{ secrets.DB_USER }} \
             --set db.password=${{ secrets.DB_PASSWORD }} \
             --set db.name=${{ secrets.DB_NAME }}
