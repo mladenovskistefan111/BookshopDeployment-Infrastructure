@@ -1,5 +1,6 @@
 image:
   repository: mladenovskistefan/frontend
+  tag: v2
 
 service:
   name: frontend-service
