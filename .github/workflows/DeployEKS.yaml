@@ -58,6 +58,17 @@ jobs:
             --set db.password=${{ secrets.DB_PASSWORD }} \
             --set db.name=${{ secrets.DB_NAME }}
 
+      - name: Wait for backend deployment to complete
+        run: |
+          echo "Waiting for backend deployment to complete..."
+          kubectl rollout status deployment/backend --namespace devops-project
+        continue-on-error: true
+
+      - name: Sleep before deploying frontend
+        run: |
+          echo "Sleeping for 60 seconds to ensure backend deployment is complete..."
+          sleep 60
+
       - name: Deploy frontend to EKS
         run: |
           helm upgrade --install frontend ./helm/frontend-chart \
