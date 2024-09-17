@@ -20,4 +20,4 @@ spec:
         - containerPort: 3000
         env:
         - name: REACT_APP_BACKEND_URL
-          value: "http://{{ .Values.backendService.name }}:{{ .Values.backendService.port }}/api"
+          value: "http://{{ .Values.backendService.name }}.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.backendService.port }}/api"
