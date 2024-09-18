@@ -18,6 +18,3 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: 3000
-        env:
-        - name: REACT_APP_BACKEND_URL
-          value: "http://{{ .Values.backendService.name }}/api"
