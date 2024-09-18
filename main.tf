@@ -32,6 +32,7 @@ module "database" {
   db_identifier        = var.db_identifier
   multi_az             = false
   skip_db_snapshot     = true
+  depends_on = [module.application]
 }
 
 
