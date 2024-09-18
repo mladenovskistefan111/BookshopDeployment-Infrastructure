@@ -3,3 +3,6 @@ namespace: devops-project
 image:
   repository: mladenovskistefan/frontend
   tag: latest
+
+backend:
+  url: "{{ .Values.backend.url }}"
