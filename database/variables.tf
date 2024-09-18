@@ -1,5 +1,6 @@
 # --- database/variables.tf ---
 
+variable "cluster_name" {}
 variable "vpc_id" {}
 variable "bastion_security_group_id" {}
 variable "db_instance_count" {}
