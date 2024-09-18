@@ -96,8 +96,8 @@ resource "aws_eks_node_group" "node_group" {
 
   scaling_config {
     desired_size = 2
-    max_size     = 3
-    min_size     = 1
+    max_size     = 2
+    min_size     = 2
   }
   ami_type = "AL2_x86_64"
   capacity_type = "ON_DEMAND"
@@ -113,36 +113,5 @@ resource "aws_eks_node_group" "node_group" {
 
   tags = {
     Name = "node_group"
-  }
-}
-
-# Security Group for the EKS Cluster
-
-resource "aws_security_group" "eks_cluster_security_group" {
-  name        = "eks_cluster_security_group"
-  description = "Allow internet access on port 80 and 8080"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "eks_cluster_security_group"
   }
 }
