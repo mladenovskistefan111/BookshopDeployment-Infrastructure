@@ -22,7 +22,7 @@ module "database" {
   source = "./database"
   vpc_id = module.networking.vpc_id
   bastion_security_group_id = module.bastion.bastion_security_group_id
-  app_security_group_id = module.application.app_security_group_id
+  cluster_name = var.cluster_name
   db_instance_count    = var.db_instance_count
   db_storage           = var.db_storage
   engine               = var.engine
