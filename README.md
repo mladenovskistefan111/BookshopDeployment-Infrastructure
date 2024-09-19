@@ -12,7 +12,7 @@ This repository contains **Terraform configurations** and **Helm charts** that s
 - **EKS Cluster** with worker nodes in two private subnets.
 - **Two NAT Gateways** (one in each public subnet) to allow EKS worker nodes internet access.
 
-To help visualize the infrastructure, here’s a diagram of the architecture:
+To help visualize the infrastructure, I created a diagram of the architecture:
 
 ![Infrastructure Diagram](https://github.com/mladenovskistefan111/AppDeploymentProject-Infrastructure/blob/main/Infrastructure.png)
 
@@ -24,6 +24,12 @@ To help visualize the infrastructure, here’s a diagram of the architecture:
   - Deploys frontend and backend pods.
   - Creates LoadBalancer services and provides a DNS link to access the application.
 
+### **Automated Code Deployment**
+
+- This infrastructure integrates with the [**AppDeploymentProject-Code**](https://github.com/mladenovskistefan111/AppDeploymentProject-Code) repository, which contains the frontend (Angular) and backend (Spring Boot) code.
+- When code changes are pushed to the [**AppDeploymentProject-Code**](https://github.com/mladenovskistefan111/AppDeploymentProject-Code) repository, a CI/CD pipeline is triggered to build both the frontend and backend into Docker images and push them to **DockerHub**.
+- After the build is complete, another pipeline is triggered to perform a **rolling update** on the Kubernetes deployment, where new pods are created from the updated images, and old pods are safely terminated.
+
 ## **Key Features**
 
 - **Fully automated** infrastructure deployment using **Terraform** and **GitHub Actions**.
@@ -31,3 +37,4 @@ To help visualize the infrastructure, here’s a diagram of the architecture:
 - **Kubernetes (EKS)** cluster for containerized applications.
 - **Helm charts** to streamline application deployment on EKS.
 - End-to-end **CI/CD pipelines** for both infrastructure and application deployment, resulting in a **highly resilient** and scalable environment.
+- **Automated code rollout** ensures seamless deployment of updated application images to the Kubernetes cluster.
