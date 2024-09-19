@@ -94,8 +94,8 @@ resource "aws_eks_node_group" "node_group" {
   version          = "1.30"
 
   scaling_config {
-    desired_size = 2
-    max_size     = 2
+    desired_size = 4
+    max_size     = 6
     min_size     = 2
   }
   ami_type = "AL2_x86_64"
