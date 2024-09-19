@@ -30,8 +30,8 @@ module "database" {
   db_instance_class    = var.db_instance_class
   db_subnet_group_name = module.networking.db_subnet_group_names[0]
   db_identifier        = var.db_identifier
-  multi_az             = false
-  skip_db_snapshot     = true
+  multi_az             = true
+  skip_db_snapshot     = false
   depends_on = [module.application]
 }
 
