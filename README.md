@@ -1,4 +1,4 @@
-# **AppDeploymentProject-Infrastructure**
+# **BookshopDeployment-Infrastructure**
 
 This project is a hands-on DevOps practice designed to demonstrate multiple skills and tools for automating the deployment of a **highly resilient** and **highly available** cloud infrastructure and an application on **AWS**. The infrastructure and application deployment are fully managed through **CI/CD pipelines**, **Terraform**, **Helm**, and **Kubernetes (EKS)**.
 
