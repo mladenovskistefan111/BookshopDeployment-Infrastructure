@@ -26,8 +26,8 @@ To help visualize the infrastructure, I created a diagram of the architecture:
 
 ### **Automated Code Deployment**
 
-- This infrastructure integrates with the [**AppDeploymentProject-Code**](https://github.com/mladenovskistefan111/AppDeploymentProject-Code) repository, which contains the frontend (Angular) and backend (Spring Boot) code.
-- When code changes are pushed to the [**AppDeploymentProject-Code**](https://github.com/mladenovskistefan111/AppDeploymentProject-Code) repository, a CI/CD pipeline is triggered to build both the frontend and backend into Docker images and push them to **DockerHub**.
+- This infrastructure integrates with the [**BookshopDeployment-Code**](https://github.com/mladenovskistefan111/BookshopDeployment-Code) repository, which contains the frontend (Angular) and backend (Spring Boot) code.
+- When code changes are pushed to the [**BookshopDeployment-Code**](https://github.com/mladenovskistefan111/BookshopDeployment-Code) repository, a CI/CD pipeline is triggered to build both the frontend and backend into Docker images and push them to **DockerHub**.
 - After the build is complete, another pipeline is triggered to perform a **rolling update** on the Kubernetes deployment, where new pods are created from the updated images, and old pods are safely terminated.
 
 ## **Key Features**
