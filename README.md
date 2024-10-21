@@ -1,16 +1,16 @@
 # **BookshopDeployment-Infrastructure**
 
-This project is a hands-on DevOps practice designed to demonstrate multiple skills and tools for automating the deployment of a **highly resilient** and **highly available** cloud infrastructure and an application on **AWS**. The infrastructure and application deployment are fully managed through **CI/CD pipelines**, **Terraform**, **Helm**, and **Kubernetes (EKS)**.
+This project is a hands-on DevOps practice designed to demonstrate multiple skills and tools for automating the deployment of a **highly resilient** and **highly available** cloud infrastructure and deployment of an application to **AWS**. The infrastructure and application deployment are fully managed through **CI/CD pipelines**.
 
 ## **Overview**
 
-This repository contains **Terraform configurations** and **Helm charts** that set up an automated AWS infrastructure for deploying a **bookshop application**. The key components of the infrastructure include:
+This repository contains **Terraform configurations** and **Helm charts** that set up AWS infrastructure for deploying a **Bookshop application**. The key components of the infrastructure include:
 
 - **VPC** with public and private subnets spanning **two availability zones**.
 - **Multi-AZ RDS PostgreSQL** database for high availability.
-- **Bastion Host** to populate the RDS database using an SQL dump.
+- **Bastion Host** to populate the RDS database with existing SQL dump.
 - **EKS Cluster** with worker nodes in two private subnets.
-- **Two NAT Gateways** (one in each public subnet) to allow EKS worker nodes internet access.
+- **Two NAT Gateways** to allow EKS worker nodes internet access.
 
 To help visualize the infrastructure, I created a diagram of the architecture:
 
